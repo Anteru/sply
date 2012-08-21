@@ -272,7 +272,7 @@ static int ply_io_printf (ply_io* io,
 #if _WIN32
     size = _vscprintf (format, args);
 #else
-    size = vsnprintf (NULL, 0, fmt, args);
+    size = vsnprintf (NULL, 0, format, args);
 #endif
 
     if (size > 4095) {
