@@ -7,15 +7,17 @@
  *
  * This library is distributed under the MIT License. See notice
  * at the end of this file.
+ *
+ * New I/O routines added by Matthaeus G. Chajdas <dev@anteru.net>
  * ---------------------------------------------------------------------- */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define RPLY_VERSION   "RPly 1.1.1"
+#define RPLY_VERSION   "RPly 1.1.2"
 #define RPLY_COPYRIGHT "Copyright (C) 2003-2011 Diego Nehab"
-#define RPLY_AUTHORS   "Diego Nehab"
+#define RPLY_AUTHORS   "Diego Nehab, Matthaeus G. Chajdas"
 
 /* ----------------------------------------------------------------------
  * Types
@@ -63,6 +65,15 @@ typedef int (*p_ply_io_read)(void* context, int length, void* output);
 typedef int (*p_ply_io_write)(void* context, int length, void* input);
 typedef int (*p_ply_io_close)(void* context);
 
+/* ----------------------------------------------------------------------
+ * Gets user data from within an error callback 
+ *
+ * write: write to output function
+ * read: read from input function
+ * close: close all allocated state; usually, this function should free
+ *	any memory allocated for the context
+ * context: contextual information passed to all functions
+ * ---------------------------------------------------------------------- */
 typedef struct t_ply_io_callback {
 	p_ply_io_write  write;
 	p_ply_io_read	read;

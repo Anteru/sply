@@ -5,6 +5,8 @@
  *
  * This library is distributed under the MIT License. See notice
  * at the end of this file.
+ *
+ * New I/O routines added by Matthaeus G. Chajdas <dev@anteru.net>
  * ---------------------------------------------------------------------- */
 #include <stdio.h>
 #include <ctype.h>
