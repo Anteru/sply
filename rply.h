@@ -82,6 +82,15 @@ typedef struct t_ply_io_callback {
 p_ply ply_open(const char *name, p_ply_error_cb error_cb, long idata, 
 		void *pdata);
 
+/* ----------------------------------------------------------------------
+ * Opens a PLY file for reading using user-defined I/O
+ *
+ * io: pointer to an I/O handler structure
+ * error_cb: error callback function
+ * idata,pdata: contextual information available to users
+ *
+ * Returns 1 if successful, 0 otherwise
+ * ---------------------------------------------------------------------- */
 p_ply ply_open_io(ply_io* io, p_ply_error_cb error_cb, long idata, 
 		void *pdata);
 
@@ -259,7 +268,14 @@ int ply_get_property_info(p_ply_property property, const char** name,
 p_ply ply_create(const char *name, e_ply_storage_mode storage_mode, 
 		p_ply_error_cb error_cb, long idata, void *pdata);
 
-
+/* ----------------------------------------------------------------------
+ * Creates new PLY file using user-defined I/O
+ *
+ * io: pointer to an I/O handler structure
+ * storage_mode: file format mode
+ *
+ * Returns handle to PLY file if successfull, NULL otherwise
+ * ---------------------------------------------------------------------- */
 p_ply ply_create_io(ply_io* io, e_ply_storage_mode storage_mode, 
 		p_ply_error_cb error_cb, long idata, void *pdata);
 
