@@ -182,7 +182,6 @@ typedef t_ply_odriver *p_ply_odriver;
  * ncomments: number of comments in file
  * obj_info: obj_info items for this file
  * nobj_infos: number of obj_info items in file
- * fp: file pointer associated with ply file
  * rn: skip extra char after end_header? 
  * buffer: last word/chunck of data read from ply file
  * buffer_first, buffer_last: interval of untouched good data in buffer
@@ -195,6 +194,7 @@ typedef t_ply_odriver *p_ply_odriver;
  * wlength: number of values in list property being written
  * error_cb: error callback
  * pdata/idata: user data defined with ply_open/ply_create
+ * io: io routines
  * ---------------------------------------------------------------------- */
 typedef struct t_ply_ {
     e_ply_io_mode io_mode;
@@ -441,7 +441,6 @@ p_ply ply_open(const char *name, p_ply_error_cb error_cb,
 
 p_ply ply_open_io (ply_io* io, p_ply_error_cb error_cb, 
         long idata, void *pdata) {
-    FILE *fp = NULL; 
     p_ply ply = ply_alloc();
     if (error_cb == NULL) error_cb = ply_error_cb;
     if (!ply) {
@@ -1031,7 +1030,7 @@ static int ply_read_word(p_ply ply) {
     size_t t = 0;
     assert(ply && ply->io_mode == PLY_READ && ply->io.read != NULL);
     /* skip leading blanks */
-    while (1) {
+    for (;;) {
         t = strspn(BFIRST(ply), " \n\r\t");
         /* check if all buffer was made of blanks */
         if (t >= BSIZE(ply)) {
@@ -1383,6 +1382,10 @@ static int ply_type_check(void) {
     assert(sizeof(t_ply_uint32) == 4);
     assert(sizeof(float) == 4);
     assert(sizeof(double) == 8);
+#ifdef _MSC_VER
+#pragma warning(push)  
+#pragma warning(disable:4127) 
+#endif
     if (sizeof(t_ply_int8) != 1) return 0;
     if (sizeof(t_ply_uint8) != 1) return 0;
     if (sizeof(t_ply_int16) != 2) return 0;
@@ -1391,6 +1394,9 @@ static int ply_type_check(void) {
     if (sizeof(t_ply_uint32) != 4) return 0;
     if (sizeof(float) != 4) return 0;
     if (sizeof(double) != 8) return 0;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
     return 1;
 }
 
