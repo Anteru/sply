@@ -74,7 +74,7 @@ typedef int (*p_ply_io_close)(void* context);
  *	any memory allocated for the context
  * context: contextual information passed to all functions
  * ---------------------------------------------------------------------- */
-typedef struct t_ply_io_callback {
+typedef struct t_ply_io {
 	p_ply_io_write  write;
 	p_ply_io_read	read;
 	p_ply_io_close	close;
