@@ -27,9 +27,18 @@ static int face_cb(p_ply_argument argument) {
     return 1;
 }
 
-int main(void) {
+int main(int argc, char** argv) {
     long nvertices, ntriangles;
-    p_ply ply = ply_open("input.ply", NULL, 0, NULL);
+    const char* input;
+    p_ply ply;
+
+    if (argc == 1) {
+        input = "input.ply";
+    } else {
+        input = argv [1];
+    }
+
+    ply = ply_open(input, NULL, 0, NULL);
     if (!ply) return 1;
     if (!ply_read_header(ply)) return 1;
     nvertices = ply_set_read_cb(ply, "vertex", "x", vertex_cb, NULL, 0);
