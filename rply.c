@@ -424,7 +424,7 @@ p_ply ply_open(const char *name, p_ply_error_cb error_cb,
 
     if (io_context->file == NULL) {
         free (io_context);
-        io_context = NULL;
+        return ply_open_io (NULL, error_cb, idata, pdata);
     }
     
     io.context = io_context;
@@ -534,6 +534,11 @@ p_ply ply_create (const char* name, e_ply_storage_mode storage_mode,
     io = (ply_io*)malloc (sizeof (ply_io));
 
     io_context->file = fopen (name, "wb");
+
+    if (io_context->file == NULL) {
+        free (io_context);
+        return ply_create_io (NULL, storage_mode, error_cb, idata, pdata);
+    }
 
     io->context = io_context;
     io->read = ply_stdio_read;
