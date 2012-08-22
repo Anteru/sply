@@ -769,7 +769,7 @@ int ply_close(p_ply ply) {
         ply_ferror(ply, "Error closing up");
         return 0;
     }
-	if (ply->io.close) ply->io.close (ply->io.context);
+    if (ply->io.close) ply->io.close (ply->io.context);
     /* free all memory used by handle */
     if (ply->element) {
         for (i = 0; i < ply->nelements; i++) {
