@@ -8,6 +8,10 @@
  *
  * New I/O routines added by Matthaeus G. Chajdas <dev@anteru.net>
  * ---------------------------------------------------------------------- */
+#if defined(_MSC_VER) && (_MSC_VER >= 1500)
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <stdio.h>
 #include <ctype.h>
 #include <assert.h>
@@ -240,12 +244,12 @@ typedef struct {
     FILE* file;
 } ply_stdio_context;
 
-static int ply_stdio_read (void* context, int size, void* buffer)
+static size_t ply_stdio_read (void* context, size_t size, void* buffer)
 {
     return fread (buffer, 1, size, ((ply_stdio_context*)context)->file);
 }
 
-static int ply_stdio_write (void* context, int size, void* buffer)
+static size_t ply_stdio_write (void* context, size_t size, const void* buffer)
 {
     return fwrite (buffer, 1, size, ((ply_stdio_context*)context)->file);
 }

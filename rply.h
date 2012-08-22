@@ -61,8 +61,8 @@ typedef void (*p_ply_error_cb)(p_ply ply, const char *message);
  * ---------------------------------------------------------------------- */
 int ply_get_ply_user_data(p_ply ply, void **pdata, long *idata);
 
-typedef int (*p_ply_io_read)(void* context, int length, void* output);
-typedef int (*p_ply_io_write)(void* context, int length, void* input);
+typedef size_t (*p_ply_io_read)(void* context, size_t length, void* output);
+typedef size_t (*p_ply_io_write)(void* context, size_t length, const void* input);
 typedef int (*p_ply_io_close)(void* context);
 
 /* ----------------------------------------------------------------------
