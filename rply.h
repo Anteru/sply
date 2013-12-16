@@ -7,15 +7,17 @@
  *
  * This library is distributed under the MIT License. See notice
  * at the end of this file.
+ *
+ * New I/O routines added by Matthaeus G. Chajdas <dev@anteru.net>
  * ---------------------------------------------------------------------- */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define RPLY_VERSION   "RPly 1.1.1"
+#define RPLY_VERSION   "RPly 1.1.3"
 #define RPLY_COPYRIGHT "Copyright (C) 2003-2011 Diego Nehab"
-#define RPLY_AUTHORS   "Diego Nehab"
+#define RPLY_AUTHORS   "Diego Nehab, Matthaeus G. Chajdas"
 
 /* ----------------------------------------------------------------------
  * Types
@@ -28,19 +30,19 @@ typedef struct t_ply_argument_ *p_ply_argument;
 
 /* ply format mode type */
 typedef enum e_ply_storage_mode_ {
-    PLY_BIG_ENDIAN,
-    PLY_LITTLE_ENDIAN,
-    PLY_ASCII,   
-    PLY_DEFAULT      /* has to be the last in enum */
+	PLY_BIG_ENDIAN,
+	PLY_LITTLE_ENDIAN,
+	PLY_ASCII,   
+	PLY_DEFAULT      /* has to be the last in enum */
 } e_ply_storage_mode; /* order matches ply_storage_mode_list */
 
 /* ply data type */
 typedef enum e_ply_type {
-    PLY_INT8, PLY_UINT8, PLY_INT16, PLY_UINT16, 
-    PLY_INT32, PLY_UIN32, PLY_FLOAT32, PLY_FLOAT64,
-    PLY_CHAR, PLY_UCHAR, PLY_SHORT, PLY_USHORT,
-    PLY_INT, PLY_UINT, PLY_FLOAT, PLY_DOUBLE,
-    PLY_LIST    /* has to be the last in enum */
+	PLY_INT8, PLY_UINT8, PLY_INT16, PLY_UINT16, 
+	PLY_INT32, PLY_UIN32, PLY_FLOAT32, PLY_FLOAT64,
+	PLY_CHAR, PLY_UCHAR, PLY_SHORT, PLY_USHORT,
+	PLY_INT, PLY_UINT, PLY_FLOAT, PLY_DOUBLE,
+	PLY_LIST    /* has to be the last in enum */
 } e_ply_type;   /* order matches ply_type_list */
 
 /* ----------------------------------------------------------------------
@@ -59,6 +61,26 @@ typedef void (*p_ply_error_cb)(p_ply ply, const char *message);
  * ---------------------------------------------------------------------- */
 int ply_get_ply_user_data(p_ply ply, void **pdata, long *idata);
 
+typedef size_t (*p_ply_io_read)(void* context, size_t length, void* output);
+typedef size_t (*p_ply_io_write)(void* context, size_t length, const void* input);
+typedef int (*p_ply_io_close)(void* context);
+
+/* ----------------------------------------------------------------------
+ * Gets user data from within an error callback 
+ *
+ * write: write to output function
+ * read: read from input function
+ * close: close all allocated state; usually, this function should free
+ *	any memory allocated for the context
+ * context: contextual information passed to all functions
+ * ---------------------------------------------------------------------- */
+typedef struct t_ply_io {
+	p_ply_io_write  write;
+	p_ply_io_read	read;
+	p_ply_io_close	close;
+	void*			context;
+} ply_io;
+
 /* ----------------------------------------------------------------------
  * Opens a PLY file for reading (fails if file is not a PLY file)
  *
@@ -69,7 +91,19 @@ int ply_get_ply_user_data(p_ply ply, void **pdata, long *idata);
  * Returns 1 if successful, 0 otherwise
  * ---------------------------------------------------------------------- */
 p_ply ply_open(const char *name, p_ply_error_cb error_cb, long idata, 
-        void *pdata);
+		void *pdata);
+
+/* ----------------------------------------------------------------------
+ * Opens a PLY file for reading using user-defined I/O
+ *
+ * io: pointer to an I/O handler structure
+ * error_cb: error callback function
+ * idata,pdata: contextual information available to users
+ *
+ * Returns 1 if successful, 0 otherwise
+ * ---------------------------------------------------------------------- */
+p_ply ply_open_io(ply_io* io, p_ply_error_cb error_cb, long idata, 
+		void *pdata);
 
 /* ----------------------------------------------------------------------
  * Reads and parses the header of a PLY file returned by ply_open
@@ -102,8 +136,8 @@ typedef int (*p_ply_read_cb)(p_ply_argument argument);
  * number of element instances otherwise. 
  * ---------------------------------------------------------------------- */
 long ply_set_read_cb(p_ply ply, const char *element_name, 
-        const char *property_name, p_ply_read_cb read_cb, 
-        void *pdata, long idata);
+		const char *property_name, p_ply_read_cb read_cb, 
+		void *pdata, long idata);
 
 /* ----------------------------------------------------------------------
  * Returns information about the element originating a callback
@@ -116,7 +150,7 @@ long ply_set_read_cb(p_ply ply, const char *element_name,
  * Returns 1 if successfull, 0 otherwise
  * ---------------------------------------------------------------------- */
 int ply_get_argument_element(p_ply_argument argument, 
-        p_ply_element *element, long *instance_index);
+		p_ply_element *element, long *instance_index);
 
 /* ----------------------------------------------------------------------
  * Returns information about the property originating a callback
@@ -129,7 +163,7 @@ int ply_get_argument_element(p_ply_argument argument,
  * Returns 1 if successfull, 0 otherwise
  * ---------------------------------------------------------------------- */
 int ply_get_argument_property(p_ply_argument argument, 
-        p_ply_property *property, long *length, long *value_index);
+		p_ply_property *property, long *length, long *value_index);
 
 /* ----------------------------------------------------------------------
  * Returns user data associated with callback 
@@ -140,7 +174,7 @@ int ply_get_argument_property(p_ply_argument argument,
  * Returns 1 if successfull, 0 otherwise
  * ---------------------------------------------------------------------- */
 int ply_get_argument_user_data(p_ply_argument argument, void **pdata, 
-        long *idata);
+		long *idata);
 
 /* ----------------------------------------------------------------------
  * Returns the value associated with a callback
@@ -204,7 +238,7 @@ const char *ply_get_next_obj_info(p_ply ply, const char *last);
  * Returns 1 if successfull or 0 otherwise
  * ---------------------------------------------------------------------- */
 int ply_get_element_info(p_ply_element element, const char** name,
-        long *ninstances);
+		long *ninstances);
 
 /* ----------------------------------------------------------------------
  * Iterates over all properties by returning the next property.
@@ -216,7 +250,7 @@ int ply_get_element_info(p_ply_element element, const char** name,
  * Returns element if successfull or NULL if no more properties
  * ---------------------------------------------------------------------- */
 p_ply_property ply_get_next_property(p_ply_element element, 
-        p_ply_property last);
+		p_ply_property last);
 
 /* ----------------------------------------------------------------------
  * Returns information about a property
@@ -232,7 +266,7 @@ p_ply_property ply_get_next_property(p_ply_element element,
  * Returns 1 if successfull or 0 otherwise
  * ---------------------------------------------------------------------- */
 int ply_get_property_info(p_ply_property property, const char** name,
-        e_ply_type *type, e_ply_type *length_type, e_ply_type *value_type);
+		e_ply_type *type, e_ply_type *length_type, e_ply_type *value_type);
 
 /* ----------------------------------------------------------------------
  * Creates new PLY file
@@ -243,7 +277,18 @@ int ply_get_property_info(p_ply_property property, const char** name,
  * Returns handle to PLY file if successfull, NULL otherwise
  * ---------------------------------------------------------------------- */
 p_ply ply_create(const char *name, e_ply_storage_mode storage_mode, 
-        p_ply_error_cb error_cb, long idata, void *pdata);
+		p_ply_error_cb error_cb, long idata, void *pdata);
+
+/* ----------------------------------------------------------------------
+ * Creates new PLY file using user-defined I/O
+ *
+ * io: pointer to an I/O handler structure
+ * storage_mode: file format mode
+ *
+ * Returns handle to PLY file if successfull, NULL otherwise
+ * ---------------------------------------------------------------------- */
+p_ply ply_create_io(ply_io* io, e_ply_storage_mode storage_mode, 
+		p_ply_error_cb error_cb, long idata, void *pdata);
 
 /* ----------------------------------------------------------------------
  * Adds a new element to the PLY file created by ply_create
@@ -268,7 +313,7 @@ int ply_add_element(p_ply ply, const char *name, long ninstances);
  * Returns 1 if successfull, 0 otherwise
  * ---------------------------------------------------------------------- */
 int ply_add_property(p_ply ply, const char *name, e_ply_type type,
-        e_ply_type length_type, e_ply_type value_type);
+		e_ply_type length_type, e_ply_type value_type);
 
 /* ----------------------------------------------------------------------
  * Adds a new list property to the last element added by ply_add_element
@@ -281,7 +326,7 @@ int ply_add_property(p_ply ply, const char *name, e_ply_type type,
  * Returns 1 if successfull, 0 otherwise
  * ---------------------------------------------------------------------- */
 int ply_add_list_property(p_ply ply, const char *name, 
-        e_ply_type length_type, e_ply_type value_type);
+		e_ply_type length_type, e_ply_type value_type);
 
 /* ----------------------------------------------------------------------
  * Adds a new property to the last element added by ply_add_element
