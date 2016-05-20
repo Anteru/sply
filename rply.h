@@ -1,5 +1,5 @@
-#ifndef PLY_H
-#define PLY_H
+#ifndef RPLY_H
+#define RPLY_H
 /* ----------------------------------------------------------------------
  * RPly library, read/write PLY files
  * Diego Nehab, IMPA
@@ -15,8 +15,8 @@
 extern "C" {
 #endif
 
-#define RPLY_VERSION   "RPly 1.1.3"
-#define RPLY_COPYRIGHT "Copyright (C) 2003-2011 Diego Nehab"
+#define RPLY_VERSION   "RPly 1.1.4"
+#define RPLY_COPYRIGHT "Copyright (C) 2003-2016 Diego Nehab"
 #define RPLY_AUTHORS   "Diego Nehab, Matthaeus G. Chajdas"
 
 /* ----------------------------------------------------------------------
@@ -273,6 +273,8 @@ int ply_get_property_info(p_ply_property property, const char** name,
  *
  * name: file name
  * storage_mode: file format mode
+ * error_cb: error callback function
+ * idata,pdata: contextual information available to users
  *
  * Returns handle to PLY file if successfull, NULL otherwise
  * ---------------------------------------------------------------------- */
@@ -398,7 +400,7 @@ int ply_close(p_ply ply);
 #endif /* RPLY_H */
 
 /* ----------------------------------------------------------------------
- * Copyright (C) 2003-2011 Diego Nehab. All rights reserved.
+ * Copyright (C) 2003-2015 Diego Nehab. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the

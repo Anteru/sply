@@ -64,14 +64,14 @@ typedef uint32_t t_ply_uint32;
 #endif
 
 /* ----------------------------------------------------------------------
- * Constants 
+ * Constants
  * ---------------------------------------------------------------------- */
 #define WORDSIZE 256
 #define LINESIZE 1024
 #define BUFFERSIZE (8*1024)
 
 typedef enum e_ply_io_mode_ {
-    PLY_READ, 
+    PLY_READ,
     PLY_WRITE
 } e_ply_io_mode;
 
@@ -80,9 +80,9 @@ static const char *const ply_storage_mode_list[] = {
 };     /* order matches e_ply_storage_mode enum */
 
 static const char *const ply_type_list[] = {
-    "int8", "uint8", "int16", "uint16", 
+    "int8", "uint8", "int16", "uint16",
     "int32", "uint32", "float32", "float64",
-    "char", "uchar", "short", "ushort", 
+    "char", "uchar", "short", "ushort",
     "int", "uint", "float", "double",
     "list", NULL
 };     /* order matches e_ply_type enum */
@@ -127,7 +127,7 @@ typedef struct t_ply_property_ {
     p_ply_read_cb read_cb;
     void *pdata;
     long idata;
-} t_ply_property; 
+} t_ply_property;
 
 /* ----------------------------------------------------------------------
  * Element information
@@ -149,8 +149,8 @@ typedef struct t_ply_element_ {
 /* ----------------------------------------------------------------------
  * Input/output driver
  *
- * Depending on file mode, different functions are used to read/write 
- * property fields. The drivers make it transparent to read/write in ascii, 
+ * Depending on file mode, different functions are used to read/write
+ * property fields. The drivers make it transparent to read/write in ascii,
  * big endian or little endian cases.
  * ---------------------------------------------------------------------- */
 typedef int (*p_ply_ihandler)(p_ply ply, double *value);
@@ -172,7 +172,7 @@ typedef struct t_ply_odriver_ {
 typedef t_ply_odriver *p_ply_odriver;
 
 /* ----------------------------------------------------------------------
- * Ply file handle. 
+ * Ply file handle.
  *
  * io_mode: read or write (from e_ply_io_mode)
  * storage_mode: mode of file associated with handle (from e_ply_storage_mode)
@@ -182,15 +182,15 @@ typedef t_ply_odriver *p_ply_odriver;
  * ncomments: number of comments in file
  * obj_info: obj_info items for this file
  * nobj_infos: number of obj_info items in file
- * rn: skip extra char after end_header? 
+ * rn: skip extra char after end_header?
  * buffer: last word/chunck of data read from ply file
  * buffer_first, buffer_last: interval of untouched good data in buffer
  * buffer_token: start of parsed token (line or word) in buffer
- * idriver, odriver: input driver used to get property fields from file 
+ * idriver, odriver: input driver used to get property fields from file
  * argument: storage space for callback arguments
  * welement, wproperty: element/property type being written
  * winstance_index: index of instance of current element being written
- * wvalue_index: index of list property value being written 
+ * wvalue_index: index of list property value being written
  * wlength: number of values in list property being written
  * error_cb: error callback
  * pdata/idata: user data defined with ply_open/ply_create
@@ -272,7 +272,7 @@ static int ply_io_printf (ply_io* io,
 
     va_list args;
     va_start (args, format);
-    
+
 #if _WIN32
     size = _vscprintf (format, args);
 #else
@@ -304,13 +304,13 @@ static int ply_io_printf (ply_io* io,
  * ---------------------------------------------------------------------- */
 static int ply_find_string(const char *item, const char* const list[]);
 static p_ply_element ply_find_element(p_ply ply, const char *name);
-static p_ply_property ply_find_property(p_ply_element element, 
+static p_ply_property ply_find_property(p_ply_element element,
         const char *name);
 
 /* ----------------------------------------------------------------------
  * Header parsing
  * ---------------------------------------------------------------------- */
-static int ply_read_header_magic(p_ply ply); 
+static int ply_read_header_magic(p_ply ply);
 static int ply_read_header_format(p_ply ply);
 static int ply_read_header_comment(p_ply ply);
 static int ply_read_header_obj_info(p_ply ply);
@@ -338,18 +338,18 @@ static void *ply_grow_array(p_ply ply, void **pointer, long *nmemb, long size);
  * Special functions
  * ---------------------------------------------------------------------- */
 static e_ply_storage_mode ply_arch_endian(void);
-static int ply_type_check(void); 
+static int ply_type_check(void);
 
 /* ----------------------------------------------------------------------
  * Auxiliary read functions
  * ---------------------------------------------------------------------- */
-static int ply_read_element(p_ply ply, p_ply_element element, 
+static int ply_read_element(p_ply ply, p_ply_element element,
         p_ply_argument argument);
-static int ply_read_property(p_ply ply, p_ply_element element, 
+static int ply_read_property(p_ply ply, p_ply_element element,
         p_ply_property property, p_ply_argument argument);
-static int ply_read_list_property(p_ply ply, p_ply_element element, 
+static int ply_read_list_property(p_ply ply, p_ply_element element,
         p_ply_property property, p_ply_argument argument);
-static int ply_read_scalar_property(p_ply ply, p_ply_element element, 
+static int ply_read_scalar_property(p_ply ply, p_ply_element element,
         p_ply_property property, p_ply_argument argument);
 
 /* ----------------------------------------------------------------------
@@ -360,10 +360,10 @@ static int ply_read_scalar_property(p_ply ply, p_ply_element element,
 #define BLINE(p) (p->buffer + p->buffer_token)
 
 /* pointer to start of untouched bytes in buffer */
-#define BFIRST(p) (p->buffer + p->buffer_first) 
+#define BFIRST(p) (p->buffer + p->buffer_first)
 
 /* number of bytes untouched in buffer */
-#define BSIZE(p) (p->buffer_last - p->buffer_first) 
+#define BSIZE(p) (p->buffer_last - p->buffer_first)
 
 /* consumes data from buffer */
 #define BSKIP(p, s) (p->buffer_first += s)
@@ -377,18 +377,16 @@ static int BREFILL(p_ply ply) {
     ply->buffer_first = ply->buffer_token = 0;
     /* fill remaining with new data */
     size = ply->io.read (ply->io.context, BUFFERSIZE-size-1, ply->buffer+size);
-    /* place sentinel so we can use str* functions with buffer */
-    ply->buffer[BUFFERSIZE-1] = '\0';
-    /* check if read failed */
-    if (size <= 0) return 0;
-    /* increase size to account for new data */
     ply->buffer_last += size;
-    return 1;
+    /* place sentinel so we can use str* functions with buffer */
+    ply->buffer[ply->buffer_last] = '\0';
+    /* check if read failed */
+    return size > 0;
 }
 
 /* We don't care about end-of-line, generally, because we
  * separate words by any white-space character.
- * Unfortunately, in binary mode, right after 'end_header', 
+ * Unfortunately, in binary mode, right after 'end_header',
  * we have to know *exactly* how many characters to skip */
 /* We use the end-of-line marker after the 'ply' magic
  * number to figure out what to do */
@@ -399,7 +397,7 @@ static int ply_read_header_magic(p_ply ply) {
         return 0;
     }
     /* check if it is ply */
-    if (magic[0] != 'p' || magic[1] != 'l' || magic[2] != 'y' 
+    if (magic[0] != 'p' || magic[1] != 'l' || magic[2] != 'y'
             || !isspace(magic[3])) {
         ply->error_cb(ply, "Wrong magic number. Expected 'ply'");
         return 0;
@@ -417,20 +415,19 @@ static int ply_read_header_magic(p_ply ply) {
 /* ----------------------------------------------------------------------
  * Read support functions
  * ---------------------------------------------------------------------- */
-p_ply ply_open(const char *name, p_ply_error_cb error_cb, 
+p_ply ply_open(const char *name, p_ply_error_cb error_cb,
         long idata, void *pdata) {
     ply_stdio_context* io_context;
     ply_io io;
 
     io_context = (ply_stdio_context*)malloc (sizeof (ply_stdio_context));
-    
+
     io_context->file = fopen (name, "rb");
 
     if (io_context->file == NULL) {
         free (io_context);
         return ply_open_io (NULL, error_cb, idata, pdata);
     }
-    
     io.context = io_context;
     io.read = ply_stdio_read;
     io.write = ply_stdio_write;
@@ -439,10 +436,15 @@ p_ply ply_open(const char *name, p_ply_error_cb error_cb,
     return ply_open_io (&io, error_cb, idata, pdata);
 }
 
-p_ply ply_open_io (ply_io* io, p_ply_error_cb error_cb, 
+p_ply ply_open_io (ply_io *io, p_ply_error_cb error_cb,
         long idata, void *pdata) {
     p_ply ply = ply_alloc();
     if (error_cb == NULL) error_cb = ply_error_cb;
+    if (!ply_type_check()) {
+        error_cb(ply, "Incompatible type system");
+        return NULL;
+    }
+    ply = ply_alloc();
     if (!ply) {
         error_cb(NULL, "Out of memory");
         return NULL;
@@ -465,6 +467,7 @@ p_ply ply_open_io (ply_io* io, p_ply_error_cb error_cb,
     return ply;
 }
 
+
 int ply_read_header(p_ply ply) {
     assert(ply && ply->io_mode == PLY_READ && ply->io.read != NULL);
     if (!ply_read_header_magic(ply)) return 0;
@@ -476,8 +479,8 @@ int ply_read_header(p_ply ply) {
     }
     /* parse elements, comments or obj_infos until the end of header */
     while (strcmp(BWORD(ply), "end_header")) {
-        if (!ply_read_header_comment(ply) && 
-                !ply_read_header_element(ply) && 
+        if (!ply_read_header_comment(ply) &&
+                !ply_read_header_element(ply) &&
                 !ply_read_header_obj_info(ply)) {
             ply_ferror(ply, "Unexpected token '%s'", BWORD(ply));
             return 0;
@@ -494,10 +497,10 @@ int ply_read_header(p_ply ply) {
     return 1;
 }
 
-long ply_set_read_cb(p_ply ply, const char *element_name, 
-        const char* property_name, p_ply_read_cb read_cb, 
+long ply_set_read_cb(p_ply ply, const char *element_name,
+        const char* property_name, p_ply_read_cb read_cb,
         void *pdata, long idata) {
-    p_ply_element element = NULL; 
+    p_ply_element element = NULL;
     p_ply_property property = NULL;
     assert(ply && element_name && property_name);
     element = ply_find_element(ply, element_name);
@@ -528,7 +531,7 @@ int ply_read(p_ply ply) {
 /* ----------------------------------------------------------------------
  * Write support functions
  * ---------------------------------------------------------------------- */
-p_ply ply_create (const char* name, e_ply_storage_mode storage_mode, 
+p_ply ply_create (const char* name, e_ply_storage_mode storage_mode,
         p_ply_error_cb error_cb, long idata, void *pdata) {
     ply_stdio_context* io_context;
     ply_io* io;
@@ -542,7 +545,6 @@ p_ply ply_create (const char* name, e_ply_storage_mode storage_mode,
         free (io_context);
         return ply_create_io (NULL, storage_mode, error_cb, idata, pdata);
     }
-
     io->context = io_context;
     io->read = ply_stdio_read;
     io->write = ply_stdio_write;
@@ -551,7 +553,7 @@ p_ply ply_create (const char* name, e_ply_storage_mode storage_mode,
     return ply_create_io (io, storage_mode, error_cb, idata, pdata);
 }
 
-p_ply ply_create_io(ply_io* io, e_ply_storage_mode storage_mode, 
+p_ply ply_create_io(ply_io* io, e_ply_storage_mode storage_mode,
         p_ply_error_cb error_cb, long idata, void *pdata) {
     p_ply ply = ply_alloc();
     if (error_cb == NULL) error_cb = ply_error_cb;
@@ -564,7 +566,7 @@ p_ply ply_create_io(ply_io* io, e_ply_storage_mode storage_mode,
         free(ply);
         return NULL;
     }
-    if (io == NULL) {		
+    if (io == NULL) {
         error_cb(ply, "Output not initialized");
         free(ply);
         return NULL;
@@ -575,7 +577,7 @@ p_ply ply_create_io(ply_io* io, e_ply_storage_mode storage_mode,
     ply->io_mode = PLY_WRITE;
     if (storage_mode == PLY_DEFAULT) storage_mode = ply_arch_endian();
     if (storage_mode == PLY_ASCII) ply->odriver = &ply_odriver_ascii;
-    else if (storage_mode == ply_arch_endian()) 
+    else if (storage_mode == ply_arch_endian())
         ply->odriver = &ply_odriver_binary;
     else ply->odriver = &ply_odriver_binary_reverse;
     ply->storage_mode = storage_mode;
@@ -583,6 +585,7 @@ p_ply ply_create_io(ply_io* io, e_ply_storage_mode storage_mode,
     ply->error_cb = error_cb;
     return ply;
 }
+
 
 int ply_add_element(p_ply ply, const char *name, long ninstances) {
     p_ply_element element = NULL;
@@ -617,7 +620,7 @@ int ply_add_scalar_property(p_ply ply, const char *name, e_ply_type type) {
     return 1;
 }
 
-int ply_add_list_property(p_ply ply, const char *name, 
+int ply_add_list_property(p_ply ply, const char *name,
         e_ply_type length_type, e_ply_type value_type) {
     p_ply_element element = NULL;
     p_ply_property property = NULL;
@@ -645,9 +648,9 @@ int ply_add_list_property(p_ply ply, const char *name,
 
 int ply_add_property(p_ply ply, const char *name, e_ply_type type,
         e_ply_type length_type, e_ply_type value_type) {
-    if (type == PLY_LIST) 
+    if (type == PLY_LIST)
         return ply_add_list_property(ply, name, length_type, value_type);
-    else 
+    else
         return ply_add_scalar_property(ply, name, type);
 }
 
@@ -682,9 +685,9 @@ int ply_add_obj_info(p_ply ply, const char *obj_info) {
 int ply_write_header(p_ply ply) {
     long i, j;
     assert(ply && ply->io_mode == PLY_WRITE && ply->io.write != NULL);
-    assert(ply->element || ply->nelements == 0); 
-    assert(!ply->element || ply->nelements > 0); 
-    if (ply_io_printf(&ply->io, "ply\nformat %s 1.0\n", 
+    assert(ply->element || ply->nelements == 0);
+    assert(!ply->element || ply->nelements > 0);
+    if (ply_io_printf(&ply->io, "ply\nformat %s 1.0\n",
                 ply_storage_mode_list[ply->storage_mode]) <= 0) goto error;
     for (i = 0; i < ply->ncomments; i++)
         if (ply_io_printf(&ply->io, "comment %s\n", ply->comment + LINESIZE*i) <= 0)
@@ -694,19 +697,19 @@ int ply_write_header(p_ply ply) {
             goto error;
     for (i = 0; i < ply->nelements; i++) {
         p_ply_element element = &ply->element[i];
-        assert(element->property || element->nproperties == 0); 
-        assert(!element->property || element->nproperties > 0); 
-        if (ply_io_printf(&ply->io, "element %s %ld\n", element->name, 
+        assert(element->property || element->nproperties == 0);
+        assert(!element->property || element->nproperties > 0);
+        if (ply_io_printf(&ply->io, "element %s %ld\n", element->name,
                     element->ninstances) <= 0) goto error;
         for (j = 0; j < element->nproperties; j++) {
             p_ply_property property = &element->property[j];
             if (property->type == PLY_LIST) {
-                if (ply_io_printf(&ply->io, "property list %s %s %s\n", 
+                if (ply_io_printf(&ply->io, "property list %s %s %s\n",
                             ply_type_list[property->length_type],
                             ply_type_list[property->value_type],
                             property->name) <= 0) goto error;
             } else {
-                if (ply_io_printf(&ply->io, "property %s %s\n", 
+                if (ply_io_printf(&ply->io, "property %s %s\n",
                             ply_type_list[property->type],
                             property->name) <= 0) goto error;
             }
@@ -738,9 +741,9 @@ int ply_write(p_ply ply, double value) {
         ply->wlength = 0;
     }
     if (!ply->odriver->ohandler[type](ply, value)) {
-        ply_ferror(ply, "Failed writing %s of %s %d (%s: %s)", 
-                    property->name, element->name, 
-                    ply->winstance_index, 
+        ply_ferror(ply, "Failed writing %s of %s %d (%s: %s)",
+                    property->name, element->name,
+                    ply->winstance_index,
                     ply->odriver->name, ply_type_list[type]);
         return 0;
     }
@@ -763,9 +766,9 @@ int ply_write(p_ply ply, double value) {
         } while (ply->welement < ply->nelements && !element->ninstances);
     }
     if (ply->storage_mode == PLY_ASCII) {
-        return (!spaceafter || ply->io.write (ply->io.context, 1, " ") > 0) && 
+        return (!spaceafter || ply->io.write (ply->io.context, 1, " ") > 0) &&
                (!breakafter || ply->io.write (ply->io.context, 1, "\n") > 0);
-    } else { 
+    } else {
         return 1;
     }
 }
@@ -776,7 +779,7 @@ int ply_close(p_ply ply) {
     assert(ply->element || ply->nelements == 0);
     assert(!ply->element || ply->nelements > 0);
     /* write last chunk to file */
-    if (ply->io_mode == PLY_WRITE && ply->io.write != NULL && 
+    if (ply->io_mode == PLY_WRITE && ply->io.write != NULL &&
         ply->io.write (ply->io.context, ply->buffer_last, ply->buffer) < ply->buffer_last) {
         ply_ferror(ply, "Error closing up");
         return 0;
@@ -799,7 +802,7 @@ int ply_close(p_ply ply) {
 /* ----------------------------------------------------------------------
  * Query support functions
  * ---------------------------------------------------------------------- */
-p_ply_element ply_get_next_element(p_ply ply, 
+p_ply_element ply_get_next_element(p_ply ply,
         p_ply_element last) {
     assert(ply);
     if (!last) return ply->element;
@@ -816,7 +819,7 @@ int ply_get_element_info(p_ply_element element, const char** name,
     return 1;
 }
 
-p_ply_property ply_get_next_property(p_ply_element element, 
+p_ply_property ply_get_next_property(p_ply_element element,
         p_ply_property last) {
     assert(element);
     if (!last) return element->property;
@@ -838,7 +841,7 @@ int ply_get_property_info(p_ply_property property, const char** name,
 
 const char *ply_get_next_comment(p_ply ply, const char *last) {
     assert(ply);
-    if (!last) return ply->comment; 
+    if (!last) return ply->comment;
     last += LINESIZE;
     if (last < ply->comment + LINESIZE*ply->ncomments) return last;
     else return NULL;
@@ -846,16 +849,16 @@ const char *ply_get_next_comment(p_ply ply, const char *last) {
 
 const char *ply_get_next_obj_info(p_ply ply, const char *last) {
     assert(ply);
-    if (!last) return ply->obj_info; 
+    if (!last) return ply->obj_info;
     last += LINESIZE;
     if (last < ply->obj_info + LINESIZE*ply->nobj_infos) return last;
     else return NULL;
 }
 
 /* ----------------------------------------------------------------------
- * Callback argument support functions 
+ * Callback argument support functions
  * ---------------------------------------------------------------------- */
-int ply_get_argument_element(p_ply_argument argument, 
+int ply_get_argument_element(p_ply_argument argument,
         p_ply_element *element, long *instance_index) {
     assert(argument);
     if (!argument) return 0;
@@ -864,7 +867,7 @@ int ply_get_argument_element(p_ply_argument argument,
     return 1;
 }
 
-int ply_get_argument_property(p_ply_argument argument, 
+int ply_get_argument_property(p_ply_argument argument,
         p_ply_property *property, long *length, long *value_index) {
     assert(argument);
     if (!argument) return 0;
@@ -874,7 +877,7 @@ int ply_get_argument_property(p_ply_argument argument,
     return 1;
 }
 
-int ply_get_argument_user_data(p_ply_argument argument, void **pdata, 
+int ply_get_argument_user_data(p_ply_argument argument, void **pdata,
         long *idata) {
     assert(argument);
     if (!argument) return 0;
@@ -900,11 +903,11 @@ int ply_get_ply_user_data(p_ply ply, void **pdata, long *idata) {
 /* ----------------------------------------------------------------------
  * Internal functions
  * ---------------------------------------------------------------------- */
-static int ply_read_list_property(p_ply ply, p_ply_element element, 
+static int ply_read_list_property(p_ply ply, p_ply_element element,
         p_ply_property property, p_ply_argument argument) {
     int l;
     p_ply_read_cb read_cb = property->read_cb;
-    p_ply_ihandler *driver = ply->idriver->ihandler; 
+    p_ply_ihandler *driver = ply->idriver->ihandler;
     /* get list length */
     p_ply_ihandler handler = driver[property->length_type];
     double length;
@@ -929,7 +932,7 @@ static int ply_read_list_property(p_ply ply, p_ply_element element,
         argument->value_index = l;
         if (!handler(ply, &argument->value)) {
             ply_ferror(ply, "Error reading value number %d of '%s' of "
-                    "'%s' number %d", l+1, property->name, 
+                    "'%s' number %d", l+1, property->name,
                     element->name, argument->instance_index);
             return 0;
         }
@@ -942,10 +945,10 @@ static int ply_read_list_property(p_ply ply, p_ply_element element,
     return 1;
 }
 
-static int ply_read_scalar_property(p_ply ply, p_ply_element element, 
+static int ply_read_scalar_property(p_ply ply, p_ply_element element,
         p_ply_property property, p_ply_argument argument) {
     p_ply_read_cb read_cb = property->read_cb;
-    p_ply_ihandler *driver = ply->idriver->ihandler; 
+    p_ply_ihandler *driver = ply->idriver->ihandler;
     p_ply_ihandler handler = driver[property->type];
     argument->length = 1;
     argument->value_index = 0;
@@ -961,15 +964,15 @@ static int ply_read_scalar_property(p_ply ply, p_ply_element element,
     return 1;
 }
 
-static int ply_read_property(p_ply ply, p_ply_element element, 
+static int ply_read_property(p_ply ply, p_ply_element element,
         p_ply_property property, p_ply_argument argument) {
-    if (property->type == PLY_LIST) 
+    if (property->type == PLY_LIST)
         return ply_read_list_property(ply, element, property, argument);
-    else 
+    else
         return ply_read_scalar_property(ply, element, property, argument);
 }
 
-static int ply_read_element(p_ply ply, p_ply_element element, 
+static int ply_read_element(p_ply ply, p_ply_element element,
         p_ply_argument argument) {
     long j, k;
     /* for each element of this type */
@@ -991,7 +994,7 @@ static int ply_read_element(p_ply ply, p_ply_element element,
 static int ply_find_string(const char *item, const char* const list[]) {
     int i;
     assert(item && list);
-    for (i = 0; list[i]; i++) 
+    for (i = 0; list[i]; i++)
         if (!strcmp(list[i], item)) return i;
     return -1;
 }
@@ -999,26 +1002,26 @@ static int ply_find_string(const char *item, const char* const list[]) {
 static p_ply_element ply_find_element(p_ply ply, const char *name) {
     p_ply_element element;
     int i, nelements;
-    assert(ply && name); 
+    assert(ply && name);
     element = ply->element;
     nelements = ply->nelements;
-    assert(element || nelements == 0); 
-    assert(!element || nelements > 0); 
-    for (i = 0; i < nelements; i++) 
+    assert(element || nelements == 0);
+    assert(!element || nelements > 0);
+    for (i = 0; i < nelements; i++)
         if (!strcmp(element[i].name, name)) return &element[i];
     return NULL;
 }
 
-static p_ply_property ply_find_property(p_ply_element element, 
+static p_ply_property ply_find_property(p_ply_element element,
         const char *name) {
     p_ply_property property;
     int i, nproperties;
-    assert(element && name); 
+    assert(element && name);
     property = element->property;
     nproperties = element->nproperties;
-    assert(property || nproperties == 0); 
-    assert(!property || nproperties > 0); 
-    for (i = 0; i < nproperties; i++) 
+    assert(property || nproperties == 0);
+    assert(!property || nproperties > 0);
+    for (i = 0; i < nproperties; i++)
         if (!strcmp(property[i].name, name)) return &property[i];
     return NULL;
 }
@@ -1047,9 +1050,9 @@ static int ply_read_word(p_ply ply) {
                 ply_ferror(ply, "Unexpected end of file");
                 return 0;
             }
-        } else break; 
-    } 
-    BSKIP(ply, t); 
+        } else break;
+    }
+    BSKIP(ply, t);
     /* look for a space after the current word */
     t = strcspn(BFIRST(ply), " \n\r\t");
     /* if we didn't reach the end of the buffer, we are done */
@@ -1105,7 +1108,7 @@ static int ply_read_line(p_ply ply) {
         BSKIP(ply, 1);
         return ply_check_line(ply);
     } else {
-        end = ply->buffer + BSIZE(ply); 
+        end = ply->buffer + BSIZE(ply);
         /* otherwise, try to refill buffer */
         if (!BREFILL(ply)) {
             ply_ferror(ply, "Unexpected end of file");
@@ -1212,7 +1215,7 @@ static void ply_element_init(p_ply_element element) {
     element->name[0] = '\0';
     element->ninstances = 0;
     element->property = NULL;
-    element->nproperties = 0; 
+    element->nproperties = 0;
 }
 
 static void ply_property_init(p_ply_property property) {
@@ -1232,7 +1235,7 @@ static p_ply ply_alloc(void) {
     return ply;
 }
 
-static void *ply_grow_array(p_ply ply, void **pointer, 
+static void *ply_grow_array(p_ply ply, void **pointer,
         long *nmemb, long size) {
     void *temp = *pointer;
     long count = *nmemb + 1;
@@ -1249,14 +1252,14 @@ static void *ply_grow_array(p_ply ply, void **pointer,
 
 static p_ply_element ply_grow_element(p_ply ply) {
     p_ply_element element = NULL;
-    assert(ply); 
-    assert(ply->element || ply->nelements == 0); 
-    assert(!ply->element || ply->nelements > 0); 
-    element = (p_ply_element) ply_grow_array(ply, (void **) &ply->element, 
+    assert(ply);
+    assert(ply->element || ply->nelements == 0);
+    assert(!ply->element || ply->nelements > 0);
+    element = (p_ply_element) ply_grow_array(ply, (void **) &ply->element,
             &ply->nelements, sizeof(t_ply_element));
     if (!element) return NULL;
     ply_element_init(element);
-    return element; 
+    return element;
 }
 
 static p_ply_property ply_grow_property(p_ply ply, p_ply_element element) {
@@ -1265,8 +1268,8 @@ static p_ply_property ply_grow_property(p_ply ply, p_ply_element element) {
     assert(element);
     assert(element->property || element->nproperties == 0);
     assert(!element->property || element->nproperties > 0);
-    property = (p_ply_property) ply_grow_array(ply, 
-            (void **) &element->property, 
+    property = (p_ply_property) ply_grow_array(ply,
+            (void **) &element->property,
             &element->nproperties, sizeof(t_ply_property));
     if (!property) return NULL;
     ply_property_init(property);
@@ -1280,7 +1283,7 @@ static int ply_read_header_format(p_ply ply) {
     ply->storage_mode = ply_find_string(BWORD(ply), ply_storage_mode_list);
     if (ply->storage_mode == (e_ply_storage_mode) (-1)) return 0;
     if (ply->storage_mode == PLY_ASCII) ply->idriver = &ply_idriver_ascii;
-    else if (ply->storage_mode == ply_arch_endian()) 
+    else if (ply->storage_mode == ply_arch_endian())
         ply->idriver = &ply_idriver_binary;
     else ply->idriver = &ply_idriver_binary_reverse;
     if (!ply_read_word(ply)) return 0;
@@ -1355,7 +1358,7 @@ static int ply_read_header_element(p_ply ply) {
     element->ninstances = dummy;
     /* get all properties for this element */
     if (!ply_read_word(ply)) return 0;
-    while (ply_read_header_property(ply) || 
+    while (ply_read_header_property(ply) ||
         ply_read_header_comment(ply) || ply_read_header_obj_info(ply))
         /* do nothing */;
     return 1;
@@ -1392,8 +1395,8 @@ static int ply_type_check(void) {
     assert(sizeof(float) == 4);
     assert(sizeof(double) == 8);
 #ifdef _MSC_VER
-#pragma warning(push)  
-#pragma warning(disable:4127) 
+#pragma warning(push)
+#pragma warning(disable:4127)
 #endif
     if (sizeof(t_ply_int8) != 1) return 0;
     if (sizeof(t_ply_uint8) != 1) return 0;
@@ -1461,7 +1464,7 @@ static int obinary_int8(p_ply ply, double value) {
 static int obinary_uint8(p_ply ply, double value) {
     t_ply_uint8 uint8 = (t_ply_uint8) value;
     if (value > PLY_UINT8_MAX || value < 0) return 0;
-    return ply->odriver->ochunk(ply, &uint8, sizeof(uint8)); 
+    return ply->odriver->ochunk(ply, &uint8, sizeof(uint8));
 }
 
 static int obinary_int16(p_ply ply, double value) {
@@ -1473,7 +1476,7 @@ static int obinary_int16(p_ply ply, double value) {
 static int obinary_uint16(p_ply ply, double value) {
     t_ply_uint16 uint16 = (t_ply_uint16) value;
     if (value > PLY_UINT16_MAX || value < 0) return 0;
-    return ply->odriver->ochunk(ply, &uint16, sizeof(uint16)); 
+    return ply->odriver->ochunk(ply, &uint16, sizeof(uint16));
 }
 
 static int obinary_int32(p_ply ply, double value) {
@@ -1495,7 +1498,7 @@ static int obinary_float32(p_ply ply, double value) {
 }
 
 static int obinary_float64(p_ply ply, double value) {
-    return ply->odriver->ochunk(ply, &value, sizeof(value)); 
+    return ply->odriver->ochunk(ply, &value, sizeof(value));
 }
 
 /* ----------------------------------------------------------------------
