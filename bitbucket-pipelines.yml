@@ -1,0 +1,14 @@
+image: gcc:latest
+
+pipelines:
+  default:
+    - step:
+        script:
+          - mkdir /cmake
+          - cd /cmake
+          - curl -O https://cmake.org/files/v3.11/cmake-3.11.2-Linux-x86_64.sh
+          - chmod +x cmake-3.11.2-Linux-x86_64.sh
+          - ./cmake-3.11.2-Linux-x86_64.sh --skip-license
+          - cd -
+          - /cmake/bin/cmake -G "Unix Makefiles" .
+          - make
