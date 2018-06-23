@@ -32,7 +32,7 @@
 #include <locale.h>
 #endif
 
-#include "rply.h"
+#include "sply.h"
 
 /* ----------------------------------------------------------------------
  * Make sure we get our integer types right
