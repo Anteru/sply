@@ -10,5 +10,5 @@ pipelines:
           - chmod +x cmake-3.11.2-Linux-x86_64.sh
           - ./cmake-3.11.2-Linux-x86_64.sh --skip-license
           - cd -
-          - /cmake/bin/cmake -G "Unix Makefiles" .
+          - /cmake/bin/cmake -G "Unix Makefiles" -DSPLY_BUILD_UTILITIES=ON .
           - make

@@ -1,15 +1,22 @@
 /* ----------------------------------------------------------------------
- * RPly library, read/write PLY files
- * Diego Nehab, IMPA
- * http://www.impa.br/~diego/software/rply
+ * SPly library, read/write PLY files
+ * This is a fork of RPly, originally written by Diego Nehab, IMPA
+ * For RPly, see: http://www.impa.br/~diego/software/rply
  *
  * This library is distributed under the MIT License. See notice
  * at the end of this file.
- *
- * New I/O routines added by Matthaeus G. Chajdas <dev@anteru.net>
  * ---------------------------------------------------------------------- */
 #if defined(_MSC_VER) && (_MSC_VER >= 1500)
 #define _CRT_SECURE_NO_WARNINGS
+#endif
+
+#ifndef SPLY_USE_C_LOCALE
+#define SPLY_USE_C_LOCALE 1
+#endif
+
+#if SPLY_USE_C_LOCALE
+#define _XOPEN_SOURCE 700
+#define _GNU_SOURCE
 #endif
 
 #include <stdio.h>
@@ -21,6 +28,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stddef.h>
+#if SPLY_USE_C_LOCALE
+#include <locale.h>
+#endif
 
 #include "rply.h"
 
@@ -195,6 +205,7 @@ typedef t_ply_odriver *p_ply_odriver;
  * error_cb: error callback
  * pdata/idata: user data defined with ply_open/ply_create
  * io: io routines
+ * locale: the 'C' locale, used for consistent number conversion
  * ---------------------------------------------------------------------- */
 typedef struct t_ply_ {
     e_ply_io_mode io_mode;
@@ -217,6 +228,13 @@ typedef struct t_ply_ {
     void *pdata;
     long idata;
     ply_io io;
+#if SPLY_USE_C_LOCALE
+#ifdef _MSC_VER
+    _locale_t locale;
+#else
+    locale_t locale;
+#endif
+#endif
 } t_ply;
 
 /* ----------------------------------------------------------------------
@@ -428,6 +446,7 @@ p_ply ply_open(const char *name, p_ply_error_cb error_cb,
         free (io_context);
         return ply_open_io (NULL, error_cb, idata, pdata);
     }
+
     io.context = io_context;
     io.read = ply_stdio_read;
     io.write = ply_stdio_write;
@@ -436,15 +455,10 @@ p_ply ply_open(const char *name, p_ply_error_cb error_cb,
     return ply_open_io (&io, error_cb, idata, pdata);
 }
 
-p_ply ply_open_io (ply_io *io, p_ply_error_cb error_cb,
+p_ply ply_open_io (ply_io* io, p_ply_error_cb error_cb,
         long idata, void *pdata) {
     p_ply ply = ply_alloc();
     if (error_cb == NULL) error_cb = ply_error_cb;
-    if (!ply_type_check()) {
-        error_cb(ply, "Incompatible type system");
-        return NULL;
-    }
-    ply = ply_alloc();
     if (!ply) {
         error_cb(NULL, "Out of memory");
         return NULL;
@@ -466,7 +480,6 @@ p_ply ply_open_io (ply_io *io, p_ply_error_cb error_cb,
     memcpy (&ply->io, io, sizeof (*io));
     return ply;
 }
-
 
 int ply_read_header(p_ply ply) {
     assert(ply && ply->io_mode == PLY_READ && ply->io.read != NULL);
@@ -543,8 +556,11 @@ p_ply ply_create (const char* name, e_ply_storage_mode storage_mode,
 
     if (io_context->file == NULL) {
         free (io_context);
+        free (io);
+
         return ply_create_io (NULL, storage_mode, error_cb, idata, pdata);
     }
+
     io->context = io_context;
     io->read = ply_stdio_read;
     io->write = ply_stdio_write;
@@ -585,7 +601,6 @@ p_ply ply_create_io(ply_io* io, e_ply_storage_mode storage_mode,
     ply->error_cb = error_cb;
     return ply;
 }
-
 
 int ply_add_element(p_ply ply, const char *name, long ninstances) {
     p_ply_element element = NULL;
@@ -726,7 +741,6 @@ int ply_write(p_ply ply, double value) {
     p_ply_property property = NULL;
     int type = -1;
     int breakafter = 0;
-    int spaceafter = 1;
     if (ply->welement > ply->nelements) return 0;
     element = &ply->element[ply->welement];
     if (ply->wproperty > element->nproperties) return 0;
@@ -755,22 +769,14 @@ int ply_write(p_ply ply, double value) {
     if (ply->wproperty >= element->nproperties) {
         ply->wproperty = 0;
         ply->winstance_index++;
-        breakafter = 1;
-        spaceafter = 0;
+        if (ply->storage_mode == PLY_ASCII) breakafter = 1;
     }
     if (ply->winstance_index >= element->ninstances) {
         ply->winstance_index = 0;
-        do {
-            ply->welement++;
-            element = &ply->element[ply->welement];
-        } while (ply->welement < ply->nelements && !element->ninstances);
+        ply->welement++;
     }
-    if (ply->storage_mode == PLY_ASCII) {
-        return (!spaceafter || ply->io.write (ply->io.context, 1, " ") > 0) &&
-               (!breakafter || ply->io.write (ply->io.context, 1, "\n") > 0);
-    } else {
-        return 1;
-    }
+
+    return !breakafter || ply->io.write (ply->io.context, 1, "\n") > 0;
 }
 
 int ply_close(p_ply ply) {
@@ -795,6 +801,13 @@ int ply_close(p_ply ply) {
     }
     if (ply->obj_info) free(ply->obj_info);
     if (ply->comment) free(ply->comment);
+#if SPLY_USE_C_LOCALE
+#if defined(_MSC_VER)
+    _free_locale(ply->locale);
+#else
+    freelocale(ply->locale);
+#endif
+#endif
     free(ply);
     return 1;
 }
@@ -1209,6 +1222,13 @@ static void ply_init(p_ply ply) {
     ply->winstance_index = 0;
     ply->wlength = 0;
     ply->wvalue_index = 0;
+#if SPLY_USE_C_LOCALE
+#if defined(_MSC_VER)
+    ply->locale = _create_locale(LC_ALL, "C");
+#else
+    ply->locale = newlocale(LC_ALL, "C", NULL);
+#endif
+#endif
 }
 
 static void ply_element_init(p_ply_element element) {
@@ -1417,42 +1437,42 @@ static int ply_type_check(void) {
  * ---------------------------------------------------------------------- */
 static int oascii_int8(p_ply ply, double value) {
     if (value > PLY_INT8_MAX || value < PLY_INT8_MIN) return 0;
-    return ply_io_printf(&ply->io, "%d", (t_ply_int8) value) > 0;
+    return ply_io_printf(&ply->io, "%d ", (t_ply_int8) value) > 0;
 }
 
 static int oascii_uint8(p_ply ply, double value) {
     if (value > PLY_UINT8_MAX || value < 0) return 0;
-    return ply_io_printf(&ply->io, "%d", (t_ply_uint8) value) > 0;
+    return ply_io_printf(&ply->io, "%d ", (t_ply_uint8) value) > 0;
 }
 
 static int oascii_int16(p_ply ply, double value) {
     if (value > PLY_INT16_MAX || value < PLY_INT16_MIN) return 0;
-    return ply_io_printf(&ply->io, "%d", (t_ply_int16) value) > 0;
+    return ply_io_printf(&ply->io, "%d ", (t_ply_int16) value) > 0;
 }
 
 static int oascii_uint16(p_ply ply, double value) {
     if (value > PLY_UINT16_MAX || value < 0) return 0;
-    return ply_io_printf(&ply->io, "%d", (t_ply_uint16) value) > 0;
+    return ply_io_printf(&ply->io, "%d ", (t_ply_uint16) value) > 0;
 }
 
 static int oascii_int32(p_ply ply, double value) {
     if (value > PLY_INT32_MAX || value < PLY_INT32_MIN) return 0;
-    return ply_io_printf(&ply->io, "%d", (t_ply_int32) value) > 0;
+    return ply_io_printf(&ply->io, "%d ", (t_ply_int32) value) > 0;
 }
 
 static int oascii_uint32(p_ply ply, double value) {
     if (value > PLY_UINT32_MAX || value < 0) return 0;
-    return ply_io_printf(&ply->io, "%d", (t_ply_uint32) value) > 0;
+    return ply_io_printf(&ply->io, "%d ", (t_ply_uint32) value) > 0;
 }
 
 static int oascii_float32(p_ply ply, double value) {
     if (value < -FLT_MAX || value > FLT_MAX) return 0;
-    return ply_io_printf(&ply->io, "%g", (float) value) > 0;
+    return ply_io_printf(&ply->io, "%g ", (float) value) > 0;
 }
 
 static int oascii_float64(p_ply ply, double value) {
     if (value < -DBL_MAX || value > DBL_MAX) return 0;
-    return ply_io_printf(&ply->io, "%g", value) > 0;
+    return ply_io_printf(&ply->io, "%g ", value) > 0;
 }
 
 static int obinary_int8(p_ply ply, double value) {
@@ -1555,7 +1575,15 @@ static int iascii_uint32(p_ply ply, double *value) {
 static int iascii_float32(p_ply ply, double *value) {
     char *end;
     if (!ply_read_word(ply)) return 0;
-    *value = strtod(BWORD(ply), &end);
+#if SPLY_USE_C_LOCALE
+#if defined(_MSC_VER)
+    *value = _strtod_l(BWORD(ply), &end, ply->locale);
+#else
+    *value = strtod_l(BWORD(ply), &end, ply->locale);
+#endif
+#else
+    *value = strtod(BWORD(play), &end);
+#endif
     if (*end || *value < -FLT_MAX || *value > FLT_MAX) return 0;
     return 1;
 }

@@ -1,10 +1,21 @@
-RPly I/O
-========
+SPly
+====
 
-This is a fork of RPly which adds support for custom I/O routines instead of
-always going through standard I/O (`fopen`, `fread`) as well as CMake project files. It is fully compatible with the original RPly 1.1.3 release.
+This is a fork of RPly which adds support for custom I/O routines instead of always going through standard I/O (`fopen`, `fread`), CMake project files, and fixes to locale handling. It is fully compatible with the original RPly 1.1.x release series.
 
 The changes are licensed under the same license as RPly and are provided by Matthäus G. Chajdas (<dev@anteru.net>).
+
+Changelog
+---------
+
+### 1.2
+
+* RPly was renamed to SPly to make clear it's not longer just I/O related.
+* SPly will now try to set locale to "C" to ensure that numbers with decimal points get correctly parsed. This seems to be the de-facto way PLY files have been written. This can be configured by setting the `SPLY_USE_C_LOCALE` variable to 0.
+
+### 1.1.4
+
+* ` ply_open_io` and `ply_create_io` was added to allow providing custom I/O callbacks. See below for more information about this functionality.
 
 Using the low-level I/O
 -----------------------

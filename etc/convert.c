@@ -2,7 +2,7 @@
 #include <stdlib.h> 
 #include <string.h> 
 #include <stdarg.h> 
-#include "rply.h"
+#include "sply.h"
 
 /* internal function prototypes */
 static void error(const char *fmt, ...);

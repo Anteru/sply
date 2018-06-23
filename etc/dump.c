@@ -1,5 +1,5 @@
 #include <stdio.h> 
-#include "rply.h"
+#include "sply.h"
 
 static int vertex_cb(p_ply_argument argument) {
     long eol;
