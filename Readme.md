@@ -1,7 +1,7 @@
 SPly
 ====
 
-This is a fork of RPly which adds support for custom I/O routines instead of always going through standard I/O (`fopen`, `fread`), CMake project files, and fixes to locale handling. It is fully compatible with the original RPly 1.1.x release series.
+This is a fork of [RPly](http://w3.impa.br/~diego/software/rply/) which adds support for custom I/O routines instead of always going through standard I/O (`fopen`, `fread`), CMake project files, and fixes to locale handling. It is fully compatible with the original RPly 1.1.x release series.
 
 The changes are licensed under the same license as RPly and are provided by Matthäus G. Chajdas (<dev@anteru.net>).
 
