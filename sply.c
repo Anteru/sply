@@ -28,8 +28,15 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stddef.h>
+
 #if SPLY_USE_C_LOCALE
+
+#if __APPLE__ && __MACH__
+#include <xlocale.h>
+#else
 #include <locale.h>
+#endif
+
 #endif
 
 #include "sply.h"
@@ -1226,7 +1233,11 @@ static void ply_init(p_ply ply) {
 #if defined(_MSC_VER)
     ply->locale = _create_locale(LC_ALL, "C");
 #else
+#if __APPLE__ && __MACH__
+    ply->locale = newlocale(LC_ALL_MASK, "C", NULL);
+#else
     ply->locale = newlocale(LC_ALL, "C", NULL);
+#endif
 #endif
 #endif
 }
