@@ -281,7 +281,11 @@ static size_t ply_stdio_write (void* context, size_t size, const void* buffer)
 
 static int ply_stdio_close (void* context)
 {
-    fclose (((ply_stdio_context*)context)->file);
+    ply_stdio_context* stdio_context = (ply_stdio_context*)context;
+
+    if (stdio_context->file) {
+        fclose (stdio_context->file);
+    }
     free (context);
 
     return 0;
@@ -445,13 +449,20 @@ p_ply ply_open(const char *name, p_ply_error_cb error_cb,
     ply_stdio_context* io_context;
     ply_io io;
 
+    if (error_cb == NULL) error_cb = ply_error_cb;
+
     io_context = (ply_stdio_context*)malloc (sizeof (ply_stdio_context));
+    if (io_context == NULL) {
+        error_cb (NULL, "Out of memory");
+        return NULL;
+    }
 
     io_context->file = fopen (name, "rb");
 
     if (io_context->file == NULL) {
+        error_cb (NULL, "Could not open file");
         free (io_context);
-        return ply_open_io (NULL, error_cb, idata, pdata);
+        return NULL;
     }
 
     io.context = io_context;
@@ -468,7 +479,7 @@ p_ply ply_open_io (ply_io* io, p_ply_error_cb error_cb,
     if (error_cb == NULL) error_cb = ply_error_cb;
     if (!ply) {
         error_cb(NULL, "Out of memory");
-        return NULL;
+        goto error;
     }
     ply->idata = idata;
     ply->pdata = pdata;
@@ -476,16 +487,21 @@ p_ply ply_open_io (ply_io* io, p_ply_error_cb error_cb,
     ply->error_cb = error_cb;
     if (!ply_type_check()) {
         error_cb(ply, "Incompatible type system");
-        free(ply);
-        return NULL;
+        goto error;
     }
     if (io == NULL) {
-        error_cb (ply, "Input not initialized");
-        free(ply);
-        return NULL;
+        error_cb (ply, "I/O not initialized");
+        goto error;
     }
     memcpy (&ply->io, io, sizeof (*io));
     return ply;
+
+error:
+    if (io) {
+        io->close (io->context);
+    }
+    free (ply);
+    return NULL;
 }
 
 int ply_read_header(p_ply ply) {
@@ -554,26 +570,31 @@ int ply_read(p_ply ply) {
 p_ply ply_create (const char* name, e_ply_storage_mode storage_mode,
         p_ply_error_cb error_cb, long idata, void *pdata) {
     ply_stdio_context* io_context;
-    ply_io* io;
+    ply_io io;
+
+    if (error_cb == NULL) error_cb = ply_error_cb;
 
     io_context = (ply_stdio_context*)malloc (sizeof (ply_stdio_context));
-    io = (ply_io*)malloc (sizeof (ply_io));
+    if (io_context == NULL) {
+        error_cb (NULL, "Out of memory");
+        return NULL;
+    }
 
     io_context->file = fopen (name, "wb");
 
     if (io_context->file == NULL) {
+        error_cb (NULL, "Could not create file");
         free (io_context);
-        free (io);
 
-        return ply_create_io (NULL, storage_mode, error_cb, idata, pdata);
+        return NULL;
     }
 
-    io->context = io_context;
-    io->read = ply_stdio_read;
-    io->write = ply_stdio_write;
-    io->close = ply_stdio_close;
+    io.context = io_context;
+    io.read = ply_stdio_read;
+    io.write = ply_stdio_write;
+    io.close = ply_stdio_close;
 
-    return ply_create_io (io, storage_mode, error_cb, idata, pdata);
+    return ply_create_io (&io, storage_mode, error_cb, idata, pdata);
 }
 
 p_ply ply_create_io(ply_io* io, e_ply_storage_mode storage_mode,
@@ -582,17 +603,15 @@ p_ply ply_create_io(ply_io* io, e_ply_storage_mode storage_mode,
     if (error_cb == NULL) error_cb = ply_error_cb;
     if (!ply) {
         error_cb(NULL, "Out of memory");
-        return NULL;
+        goto error;
     }
     if (!ply_type_check()) {
         error_cb(ply, "Incompatible type system");
-        free(ply);
-        return NULL;
+        goto error;
     }
     if (io == NULL) {
-        error_cb(ply, "Output not initialized");
-        free(ply);
-        return NULL;
+        error_cb(ply, "I/O not initialized");
+        goto error;
     }
 
     ply->idata = idata;
@@ -607,6 +626,13 @@ p_ply ply_create_io(ply_io* io, e_ply_storage_mode storage_mode,
     memcpy (&ply->io, io, sizeof (*io));
     ply->error_cb = error_cb;
     return ply;
+
+error:
+    if (io) {
+        io->close (io->context);
+    }
+    free (ply);
+    return NULL;
 }
 
 int ply_add_element(p_ply ply, const char *name, long ninstances) {
