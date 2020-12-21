@@ -1,19 +1,19 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-PROJECT(SPly)
+cmake_minimum_required(VERSION 2.8.12)
+project(SPly)
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-ADD_LIBRARY(SPly STATIC sply.c sply.h)
+add_library(SPly STATIC sply.c sply.h)
 
-OPTION(SPLY_BUILD_UTILITIES "Build the SPly utilities" OFF)
+option(SPLY_BUILD_UTILITIES "Build the SPly utilities" OFF)
 
-IF(SPLY_BUILD_UTILITIES)
-ADD_EXECUTABLE(dump etc/dump.c)
-TARGET_LINK_LIBRARIES(dump SPly)
+if(SPLY_BUILD_UTILITIES)
+    add_executable(dump etc/dump.c)
+    target_link_libraries(dump SPly)
 
-ADD_EXECUTABLE(convert etc/convert.c)
-TARGET_LINK_LIBRARIES(convert SPly)
+    add_executable(convert etc/convert.c)
+    target_link_libraries(convert SPly)
 
-ADD_EXECUTABLE(sconvert etc/sconvert.c)
-TARGET_LINK_LIBRARIES(sconvert SPly)
-ENDIF(SPLY_BUILD_UTILITIES)
+    add_executable(sconvert etc/sconvert.c)
+    target_link_libraries(sconvert SPly)
+endif(SPLY_BUILD_UTILITIES)
