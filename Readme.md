@@ -15,7 +15,7 @@ Changelog
 
 ### 1.1.4
 
-* ` ply_open_io` and `ply_create_io` was added to allow providing custom I/O callbacks. See below for more information about this functionality.
+* `ply_open_io` and `ply_create_io` was added to allow providing custom I/O callbacks. See below for more information about this functionality.
 
 Using the low-level I/O
 -----------------------
