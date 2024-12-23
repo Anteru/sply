@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{matrix.os}}-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: CMake configure
       run: cmake -G "Unix Makefiles" -DSPLY_BUILD_UTILITIES=ON -DCMAKE_BUILD_TYPE=${{matrix.config}} .
     - name: Build
@@ -30,7 +30,7 @@ jobs:
     name: windows-${{matrix.architecture}}-${{matrix.config}}
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: CMake configure
       run: cmake -DSPLY_BUILD_UTILITIES=ON -A ${{matrix.architecture}} .
     - name: Build
